@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class Movement : MonoBehaviour
+public class Movement : NetworkBehaviour
 {
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
@@ -12,6 +13,13 @@ public class Movement : MonoBehaviour
 
     private void Update()
     {
+        if (!IsOwner)
+        {
+            playerCamera.enabled = false;
+            playerCamera.GetComponent<AudioListener>().enabled = false;
+            return;
+        }
+
         PlayerMove();
         PlayerJump();
         CameraMovement();
@@ -22,8 +30,8 @@ public class Movement : MonoBehaviour
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
-        Vector3 move = new Vector3(horizontal, 0, vertical);
-        transform.Translate(move * moveSpeed * Time.deltaTime);
+        Vector3 move = new Vector3(horizontal, 0, vertical).normalized * moveSpeed * Time.deltaTime;
+        transform.Translate(move, Space.Self);
     }
 
     void PlayerJump()
